@@ -114,6 +114,16 @@
     .code-preview pre { margin: 23px 0 0; font-size: 14px; line-height: 2; color: var(--lime); white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; }
     .preview-caption { border-top: 1px solid #45604d; color: #c3d4c4; padding: 14px 28px; font-size: 11px; min-height: 66px; }
     .inline-note { margin-top: 16px; font-size: 12px; color: var(--muted); }
+    .sync-route { display: grid; grid-template-columns: 1fr 1fr 1fr; list-style: none; padding: 0; margin: 0; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--white); }
+    .sync-route li { min-width: 0; padding: 24px; }
+    .sync-route li + li { border-left: 1px solid var(--line); }
+    .sync-route .hub { background: var(--soft-green); }
+    .sync-route .mini-label { display: block; margin-bottom: 14px; }
+    .sync-route h3 { font-size: 20px; }
+    .sync-route p { margin-top: 10px; color: var(--muted); font-size: 13px; }
+    .sync-route code { display: block; margin-top: 18px; font-size: 12px; color: var(--green); }
+    .sync-highlight { margin-block: 18px 22px; padding: 16px 20px; border-left: 3px solid var(--green); background: var(--soft-green); font-size: 13px; }
+    .sync-section .sync-detail { margin-top: 24px; }
     .secrets-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; }
     .secret-card { padding: 28px; border-radius: var(--radius); background: var(--soft-orange); }
     .secret-card h3 { font-size: 20px; margin-top: 12px; }
@@ -201,6 +211,11 @@
       .tab { padding-inline: 10px; }
       .preview-caption { padding-inline: 22px; }
       .secrets-layout { grid-template-columns: 1fr; gap: 24px; }
+      .sync-route { grid-template-columns: 1fr; }
+      .sync-route li { padding: 21px 24px; }
+      .sync-route li + li { border-left: 0; border-top: 1px solid var(--line); }
+      .sync-route .mini-label { margin-bottom: 8px; }
+      .sync-route code { margin-top: 10px; }
       .secret-card { padding: 24px; }
       .prompt-section { padding: 24px; gap: 24px; }
       .prompt-section h2 { font-size: 23px; }
@@ -229,7 +244,7 @@
       details { content-visibility: visible; }
       pre { white-space: pre-wrap; overflow-wrap: anywhere; }
       h2, h3, summary { break-after: avoid; }
-      .workflow, .lab, .secret-card, .prompt-box { break-inside: avoid; }
+      .workflow, .sync-route, .lab, .secret-card, .prompt-box { break-inside: avoid; }
       footer { margin-top: 20px; }
     }
   </style>
@@ -241,7 +256,7 @@
     <nav aria-label="문서 목차">
       <a href="#flow">한눈에 이해</a>
       <a href="#playground">직접 바꿔보기</a>
-      <a class="optional-nav" href="#practice">따라 하기 ↗</a>
+      <a href="#sync">Git 동기화</a>
     </nav>
   </header>
   <main id="main" class="wrap">
@@ -249,7 +264,7 @@
       <div>
         <p class="eyebrow">A LITTLE GUIDE FOR FRIENDS</p>
         <h1 id="hero-title">설정은 가볍게.<br>비밀은 <em>금고에.</em></h1>
-        <p class="hero-description">AI를 쓰다 늘어난 설정과 API 키.<br><strong>재료 목록, 조리법, 금고</strong>만 떠올려 보세요.<br>chezmoi와 환경변수 관리가 쉬워집니다.</p>
+        <p class="hero-description">AI를 쓰다 늘어난 설정과 API 키.<br><strong>재료 목록, 조리법, 금고</strong>만 떠올려 보세요.<br>Git으로 연결하면 다른 컴퓨터에도 한 번에 반영해요.</p>
         <div class="hero-actions">
           <a class="button" href="#flow">그림으로 이해하기 <span aria-hidden="true">↓</span></a>
           <a class="text-link" href="#ai">AI에게 부탁하는 법 ↗</a>
@@ -293,9 +308,73 @@
       <p class="footnote"><span class="dot" aria-hidden="true">●</span><span>환경변수는 프로그램이 읽는 이름표예요. 데이터 파일을 만드는 것만으로 자동 등록되지는 않아요.</span></p>
     </section>
 
-    <section class="chapter" id="playground" aria-labelledby="lab-title">
+    <section class="chapter sync-section" id="sync" aria-labelledby="sync-title">
       <div class="section-heading">
         <span class="chapter-number" aria-hidden="true">02</span>
+        <div><h2 id="sync-title">한 번 바꾸고, 다른 컴퓨터에도 한 번에.</h2><p>GitHub에 내 조리법 책을 두면 컴퓨터마다 설정을 다시 복사하지 않아도 돼요.</p></div>
+      </div>
+      <ol class="sync-route" aria-label="Git으로 설정을 주고받는 순서">
+        <li><span class="mini-label">01 / COMPUTER A →</span><h3>내 컴퓨터에서 바꾸기</h3><p>데이터와 양식을 고치고<br>관리 파일에 일괄 적용해요.</p><code>chezmoi apply</code></li>
+        <li class="hub"><span class="mini-label">02 / GITHUB →</span><h3>내 dotfiles에 올리기</h3><p>Git으로 변경을 기록하고 올려요.<br>자동 커밋·푸시도 켤 수 있어요.</p><code>commit + push</code></li>
+        <li><span class="mini-label">03 / COMPUTER B</span><h3>한 명령으로 받아 쓰기</h3><p>최신 설정을 내려받고<br>관리 파일들에 함께 반영해요.</p><code>chezmoi update</code></li>
+      </ol>
+      <p class="sync-highlight">설정 파일 세 개가 같은 <code>app.name</code>을 읽는다면? <strong>데이터 한 곳만 바꿔도 세 파일을 함께 새로 만들어요.</strong></p>
+      <p class="inline-note"><code>apply</code>는 현재 소스를 적용, <code>push</code>는 소스를 올리기, <code>update</code>는 내려받기 + 적용이에요.</p>
+      <div class="sync-detail">
+        <details>
+          <summary><span class="summary-number">01</span>처음 연결하는 컴퓨터</summary>
+          <div class="detail-body">
+            <p>Git이 설치돼 있고 내 dotfiles에 데이터와 양식이 올라가 있다면, <code>YOUR_NAME</code>을 내 계정으로 바꿔 실행해요.</p>
+            <pre><code data-source-block="9"># 처음 한 번: 내 설정 저장소를 내려받고 적용합니다.
+chezmoi init --apply https://github.com/YOUR_NAME/dotfiles.git
+</code></pre>
+            <p>이 명령은 실제 홈 설정을 바꿔요. 믿을 수 있는 내 저장소를 사용해요.</p>
+            <p><code>myhg</code>는 이 설명서이고, 동기화할 설정은 별도의 <code>dotfiles</code> 저장소에 둬요. 작성자는 <code>mack1210/dotfiles</code>를 사용해요.</p>
+          </div>
+        </details>
+        <details>
+          <summary><span class="summary-number">02</span>컴퓨터 A에서 바꾸고, B에서 한 번에 받기</summary>
+          <div class="detail-body">
+            <h3>컴퓨터 A · 수정하고 올리기</h3>
+            <p><code>chezmoi source-path</code> 폴더의 데이터와 양식을 수정한 뒤 실행해요. 아래는 이 문서의 비밀 없는 예제이며, Git 작성자 정보와 원격 인증이 준비돼 있어야 해요.</p>
+            <pre><code data-source-block="10"># 관리 중인 양식들에 값을 채워, 이 컴퓨터에 일괄 적용합니다.
+chezmoi apply
+# 데이터와 양식을 기록하고 GitHub로 올립니다.
+chezmoi git add .chezmoidata.yaml private_dot_friend-ai.env.tmpl
+chezmoi git -- commit -m "Update AI app settings"
+chezmoi git push
+</code></pre>
+            <p>일반 설정 파일을 홈에서 직접 고쳤다면 <code>chezmoi re-add &lt;파일&gt;</code>로 먼저 소스에 담아요. 템플릿 값은 데이터·양식을 고치고, 기존 암호화 방식은 유지해요.</p>
+            <h3>컴퓨터 B · 내려받고 일괄 적용하기</h3>
+            <pre><code data-source-block="11"># GitHub에서 최신 설정을 받고, 관리 파일들에 일괄 적용합니다.
+chezmoi update
+</code></pre>
+            <p>컴퓨터마다 데이터가 다르면 완성 파일도 달라질 수 있어요. 실행 중인 앱은 설정을 다시 읽거나 재시작해야 할 수 있어요.</p>
+          </div>
+        </details>
+        <details>
+          <summary><span class="summary-number">03</span>커밋·푸시까지 자동으로 처리하기</summary>
+          <div class="detail-body">
+            <p>각 컴퓨터에서 chezmoi 자체 설정을 열어요.</p>
+            <pre><code data-source-block="12">chezmoi edit-config
+</code></pre>
+            <p>TOML 설정을 쓰면 <code>~/.config/chezmoi/chezmoi.toml</code>의 기존 <code>[git]</code> 항목에 합쳐요. 기본값은 꺼져 있으며, <code>.chezmoidata.yaml</code>에 넣는 값은 아니에요.</p>
+            <pre><code data-source-block="13">[git]
+    autoCommit = true
+    autoPush = true
+</code></pre>
+            <p><code>chezmoi add</code>·<code>re-add</code>·<code>edit</code> 같은 명령으로 소스를 바꿀 때 커밋·푸시를 자동 처리해요. 편집기로 직접 고친 모든 순간을 감시하는 기능은 아니므로 기록·푸시 여부를 확인해요.</p>
+            <p class="notice">다른 컴퓨터에서는 여전히 <code>chezmoi update</code>를 실행해요. 정기적으로 자동 반영하려면 별도 예약 실행이 필요해요.</p>
+            <p>자동 푸시를 켜면 잘못 담은 비밀값도 바로 올라갈 수 있어요. pass 저장소와 GPG 키는 이 연결만으로 복제되지 않으므로 따로 준비해요.</p>
+            <p>업데이트 충돌이나 푸시 오류가 나면 변경 내용을 확인해 해결하고, 강제 푸시로 덮어쓰지 않아요.</p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <section class="chapter" id="playground" aria-labelledby="lab-title">
+      <div class="section-heading">
+        <span class="chapter-number" aria-hidden="true">03</span>
         <div><h2 id="lab-title">이름 하나 바꾸면, 설정도 따라와요.</h2><p>아래 값을 바꾸고 재료 → 양식 → 결과를 눌러 보세요.</p></div>
       </div>
       <noscript><p>이 브라우저에서는 자바스크립트가 꺼져 있어 기본 예제만 보여요. 아래 실습과 설명은 그대로 읽을 수 있어요.</p></noscript>
@@ -337,14 +416,14 @@ APP_ENV="practice"</code></pre>
 
     <section class="chapter" id="secrets" aria-labelledby="secret-title">
       <div class="section-heading">
-        <span class="chapter-number" aria-hidden="true">03</span>
+        <span class="chapter-number" aria-hidden="true">04</span>
         <div><h2 id="secret-title">비밀값 대신, 금고 칸 이름을 적어요.</h2><p>API 키는 AI 서비스에 들어가는 열쇠예요. pass는 그 열쇠를 보관하는 금고예요.</p></div>
       </div>
       <div class="secrets-layout">
         <div class="secret-card">
           <span class="stamp">KEEP THE KEY IN THE VAULT</span>
           <h3>공유하는 건 조리법까지.</h3>
-          <p>Git은 설정 양식의 변경 기록이에요.<br>재료 목록과 양식은 공유하고,<br>실제 키가 들어간 완성 파일은 내 컴퓨터에 둬요.</p>
+          <p>Git은 설정의 변경 기록이자 전달 통로예요.<br>재료 목록과 양식은 공유하고,<br>실제 키가 들어간 완성 파일은 내 컴퓨터에 둬요.</p>
         </div>
         <ol class="secret-steps">
           <li><strong>pass에 실제 키를 보관해요.</strong><p>예: <code>api/openai/api_key</code>라는 칸에 저장해요.</p></li>
@@ -357,7 +436,7 @@ APP_ENV="practice"</code></pre>
     <section class="chapter" id="ai" aria-labelledby="ai-title">
       <div class="prompt-section">
         <div>
-          <span class="mini-label">04 / ASK YOUR AI</span>
+          <span class="mini-label">05 / ASK YOUR AI</span>
           <h2 id="ai-title">AI에게는 양식을,<br>비밀은 금고에.</h2>
           <p class="prompt-description">설정 구조와 가짜 값, 원하는 결과를 알려 주세요.<br>오른쪽 요청문을 복사해서 시작해 보세요.</p>
         </div>
@@ -375,7 +454,7 @@ API 키는 pass의 api/openai/api_key에서 읽도록 해 줘.
 
     <section class="chapter" id="practice" aria-labelledby="practice-title">
       <div class="section-heading">
-        <span class="chapter-number" aria-hidden="true">05</span>
+        <span class="chapter-number" aria-hidden="true">06</span>
         <div><h2 id="practice-title">이제 직접 만들어 볼까요?</h2><p>처음에는 비밀값 없이, 임시 폴더에서 연습해요.</p></div>
       </div>
       <p class="practice-intro">준비물: chezmoi가 설치된 Bash · 아래 단계는 같은 터미널에서 순서대로 진행해요.</p>
@@ -459,7 +538,7 @@ printf '%s\n' "$APP_NAME"
           <p>실제 파일에 <code>chezmoi apply</code>를 하기 전에는 대상·변경 내용·자동 커밋 및 푸시 설정을 확인해요.</p>
           <h3>이 저장소의 예제 검사</h3>
           <pre><code>python3 -m unittest discover -s tests -v</code></pre>
-          <p>Python 3와 chezmoi로 가짜 값을 검사해요. 실제 홈 설정과 금고는 사용하지 않아요.</p>
+          <p>Python 3, chezmoi, Git으로 가짜 값과 임시 저장소의 동기화를 검사해요. 실제 홈 설정과 금고는 사용하지 않아요.</p>
         </div>
       </details>
       <div class="references" aria-label="공식 참고 자료">
@@ -467,6 +546,8 @@ printf '%s\n' "$APP_NAME"
         <a href="https://www.chezmoi.io/reference/special-files/chezmoidata-format/">공유 데이터 파일 ↗</a>
         <a href="https://www.chezmoi.io/user-guide/password-managers/pass/">pass 연결 안내 ↗</a>
         <a href="https://www.chezmoi.io/reference/commands/execute-template/">execute-template ↗</a>
+        <a href="https://www.chezmoi.io/user-guide/daily-operations/">Git 연동·자동 커밋 ↗</a>
+        <a href="https://www.chezmoi.io/reference/commands/update/">update 명령 ↗</a>
       </div>
     </section>
 

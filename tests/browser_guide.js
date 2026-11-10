@@ -49,9 +49,15 @@ async (page) => {
   await page.waitForFunction(() => document.querySelector("#copy-status").textContent.includes("Ctrl+C"));
   assert(await page.evaluate(() => window.getSelection().toString() === document.querySelector("#ai-prompt").textContent), "Denied clipboard must select the prompt for manual copy");
 
-  const firstSummary = page.locator("details summary").first();
+  await page.getByRole("link", { name: "Git 동기화", exact: true }).click();
+  assert(await page.locator("#sync-title").isVisible(), "Git navigation must reach the sync section");
+  assert(await page.locator(".sync-route li").count() === 3, "Sync must explain A, GitHub, and B");
+  await page.locator("#sync details summary").last().click();
+  assert(await page.locator("[data-source-block='13']").isVisible(), "Automation settings must expand");
+
+  const firstSummary = page.locator("#practice details summary").first();
   await firstSummary.click();
-  assert(await page.locator("details").first().getAttribute("open") !== null, "Practice section must expand");
+  assert(await page.locator("#practice details").first().getAttribute("open") !== null, "Practice section must expand");
   assert(await page.evaluate(() => {
     const before = [...document.querySelectorAll("details")].map(detail => detail.open);
     window.dispatchEvent(new Event("beforeprint"));
@@ -70,12 +76,12 @@ async (page) => {
   await cdp.send("Emulation.setScriptExecutionDisabled", { value: true });
   await offline.goto(page.url());
   assert(await offline.locator("noscript").innerText() !== "", "No-script readers must receive guidance");
-  await offline.locator("details summary").first().click();
+  await offline.locator("#practice details summary").first().click();
   assert(await offline.locator("[data-source-block='0']").isVisible(), "Practice must work without JavaScript");
   await offline.close();
 
   assert(errors.length === 0, `Browser errors: ${errors.join(", ")}`);
   await page.reload();
   await page.setViewportSize({ width: 1440, height: 1000 });
-  return { passed: true, checked: ["live preview", "keyboard tabs", "input escaping", "clipboard success and denial", "practice disclosure", "print", "responsive widths", "no JavaScript"] };
+  return { passed: true, checked: ["live preview", "keyboard tabs", "input escaping", "clipboard success and denial", "Git sync section", "practice disclosure", "print", "responsive widths", "no JavaScript"] };
 }
