@@ -195,11 +195,120 @@ TOML 설정을 쓴다면 `~/.config/chezmoi/chezmoi.toml`의 기존 `[git]` 항�
 `pass`의 비밀 저장소와 GPG 키는 이 Git 연결만으로 복제되지 않으므로 각 컴퓨터에서 따로 준비합니다.
 업데이트 충돌이나 푸시 오류가 나면 변경 내용을 확인하고 해결하며 강제 푸시로 덮어쓰지 않습니다.
 
+## 7. 내 상황에 맞는 실전 workflow
+
+[모식도와 함께 네 가지 사례 보기](../index.html#workflows)
+화살표 위에는 실행할 작업을, 아래 예제에는 실행할 컴퓨터를 적었습니다.
+
+### Case 1. 스터디용 AI 앱 이름을 세 설정에 함께 바꾸기
+
+**상황:** 컴퓨터 A와 B에서 AI 채팅·명령 도구·작업 도구를 쓰고 있고, 앱 이름을 `friend-ai`에서 `study-ai`로 바꾸고 싶습니다.
+**준비:** 앞선 양식을 복사한 `private_dot_friend-mirror.env.tmpl`, `private_dot_friend-worker.env.tmpl`도 Git에 저장해 두며, 세 양식 모두 `.app.name`을 읽는다고 가정합니다.
+이 사례는 자동 커밋·푸시를 끈 기본 설정 기준이며, 자동화를 켠 흐름은 Case 3에서 다룹니다.
+
+> A의 데이터·양식 → 커밋·푸시 → GitHub → B에서 update → B의 세 설정 파일
+>
+> A에서는 같은 데이터·양식에 apply → A의 세 설정 파일
+
+1. **컴퓨터 A:** `chezmoi source-path` 폴더의 `.chezmoidata.yaml`에서 이름을 바꿉니다.
+
+```yaml
+app:
+  name: study-ai
+  environment: practice
+```
+
+2. **컴퓨터 A:** 바뀐 값으로 관리 파일들을 만들고, 데이터 변경을 올립니다.
+
+```bash
+chezmoi apply
+chezmoi git add .chezmoidata.yaml
+chezmoi git -- commit -m "Rename AI study app"
+chezmoi git push
+```
+
+3. **컴퓨터 B:** 최신 데이터를 받아 세 파일을 함께 다시 만듭니다.
+
+```bash
+chezmoi update
+```
+
+**결과:** 두 컴퓨터의 `.friend-ai.env`, `.friend-mirror.env`, `.friend-worker.env`에 모두 `APP_NAME="study-ai"`가 들어갑니다.
+Git으로 올라가는 것은 데이터·양식이며, 완성된 `.env`는 각 컴퓨터에서 만들어집니다.
+실행 중인 도구는 설정을 다시 읽게 하거나 재시작합니다.
+
+### Case 2. 새 노트북에서 내 작업 환경 시작하기
+
+**상황:** 노트북을 바꿨고, 예전에 정리한 설정을 다시 쓰고 싶습니다.
+**준비:** Git·chezmoi를 설치하고 내 dotfiles 접근 권한을 준비하며, `YOUR_NAME`을 내 계정으로 바꿉니다.
+
+> GitHub의 데이터·양식 → init → 새 노트북의 소스 → apply → 새 노트북의 설정 파일
+
+**새 노트북에서 실행합니다.**
+
+```bash
+# 먼저 내 저장소를 내려받습니다.
+chezmoi init https://github.com/YOUR_NAME/dotfiles.git
+# 비밀값을 쓰면 이 단계 전에 pass 저장소·GPG 키를 따로 준비합니다.
+chezmoi apply
+```
+
+**결과:** 관리 중인 설정 파일들이 새 노트북에 만들어집니다.
+이번에는 내려받기와 적용을 나눠서 금고를 준비할 틈을 뒀으며, 처음부터 금고까지 준비돼 있다면 앞선 `init --apply`로 한 번에 할 수 있습니다.
+프로그램 설치 자체는 별도이며, dotfiles에 설치 자동화까지 따로 작성한 경우에만 그 작업도 수행됩니다.
+
+### Case 3. 홈에서 바꾼 일반 설정을 자동으로 올리기
+
+**상황:** 컴퓨터 A의 `~/.friend-settings.conf`에서 `theme=green`을 `theme=dark`로 고쳤습니다.
+**준비:** 이 파일은 이미 chezmoi가 관리하는 비밀 없는 일반 파일이며, A에 `autoCommit`·`autoPush`를 켜 두었습니다.
+
+> A의 일반 설정 파일 → re-add → A의 소스 → 자동 커밋·푸시 → GitHub → B에서 update → B의 일반 설정 파일
+
+1. **컴퓨터 A:** 변경된 파일을 다시 담으면, 기록하고 올리는 작업까지 자동으로 진행됩니다.
+
+```bash
+chezmoi re-add ~/.friend-settings.conf
+```
+
+2. **컴퓨터 B:** 올려둔 설정을 받아 적용합니다.
+
+```bash
+chezmoi update
+```
+
+**결과:** B의 같은 파일에도 `theme=dark`가 들어갑니다.
+자동화를 껐다면 `re-add` 후 Git 커밋·푸시를 직접 해야 하며, 템플릿 파일은 `re-add` 대신 데이터·양식을 수정합니다.
+아직 관리하지 않는 새 파일이라면 먼저 관리 방식을 정하고 `chezmoi add <파일>`로 등록합니다.
+
+### Case 4. API 키만 새 키로 교체하기
+
+**상황:** AI 서비스에서 새 키를 발급받았고, 기존 키를 교체하고 싶습니다.
+**준비:** 데이터에는 `api/openai/api_key` 경로가 있고, `.friend-ai.env` 양식이 그 경로에서 값을 읽도록 연결돼 있습니다.
+
+> 각 컴퓨터의 pass 금고 → apply가 키를 읽음 → 해당 컴퓨터의 .env → 앱 재시작
+
+1. **키를 바꿀 컴퓨터:** 같은 금고 칸의 값을 교체하고, 기존 값 덮어쓰기 질문을 확인한 뒤 새 키를 입력 창에 입력합니다.
+
+```bash
+pass insert api/openai/api_key
+```
+
+2. **같은 컴퓨터:** 키를 쓰는 파일을 다시 만들고, 앱이 설정을 다시 읽게 합니다.
+
+```bash
+chezmoi apply ~/.friend-ai.env
+```
+
+**결과:** 경로·양식은 그대로이고 완성 파일의 키만 바뀌므로, 이 경우 dotfiles를 커밋·푸시할 필요는 없습니다.
+다른 컴퓨터의 금고에도 새 값을 별도로 준비하고 각자 `apply`를 실행하며, pass 저장소의 별도 동기화를 사용한다면 그 절차를 따릅니다.
+이 경로에는 GitHub로 실제 키를 보내는 화살표가 없으며, 비밀이 출력될 수 있는 `diff`로 교체 결과를 확인하지 않습니다.
+
 ## 예제 검사와 참고 자료
 
 `python3 -m unittest discover -s tests -v`로 문서 속 양식의 값 치환, 환경변수 전달, 가짜 금고 연결을 검사합니다.
 테스트에는 Python 3, chezmoi, Git이 필요하며 실제 홈 설정이나 금고를 사용하지 않습니다.
 임시 Git 저장소와 가상 컴퓨터 두 개로 최초 적용, 일괄 업데이트, 자동 커밋·푸시도 검사합니다.
+실전 사례의 세 파일 일괄 변경, 일반 파일의 자동 전송, 가짜 API 키 교체도 함께 검사합니다.
 
 - [공식 템플릿 안내](https://www.chezmoi.io/user-guide/templating/)
 - [공유 데이터 파일 안내](https://www.chezmoi.io/reference/special-files/chezmoidata-format/)
@@ -207,3 +316,4 @@ TOML 설정을 쓴다면 `~/.config/chezmoi/chezmoi.toml`의 기존 `[git]` 항�
 - [execute-template 명령](https://www.chezmoi.io/reference/commands/execute-template/)
 - [Git 연동과 자동 커밋·푸시](https://www.chezmoi.io/user-guide/daily-operations/)
 - [update 명령](https://www.chezmoi.io/reference/commands/update/)
+- [re-add 명령](https://www.chezmoi.io/reference/commands/re-add/)

@@ -124,6 +124,44 @@
     .sync-route code { display: block; margin-top: 18px; font-size: 12px; color: var(--green); }
     .sync-highlight { margin-block: 18px 22px; padding: 16px 20px; border-left: 3px solid var(--green); background: var(--soft-green); font-size: 13px; }
     .sync-section .sync-detail { margin-top: 24px; }
+    .case-jump { display: inline-block; margin-top: 20px; font-size: 13px; font-weight: 650; color: var(--green); }
+    .case-marker { font: 11px var(--mono); padding-top: 11px; letter-spacing: .06em; }
+    .case-tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-bottom: 18px; }
+    .case-tab { min-height: 52px; padding: 12px 10px; border: 1px solid var(--line); border-radius: 7px; background: var(--white); color: var(--ink); font-size: 13px; font-weight: 600; }
+    .case-tab[aria-selected="true"] { background: var(--green); border-color: var(--green); color: var(--white); }
+    .case-tab:hover { border-color: var(--green); }
+    .case-panel { border: 1px solid var(--line); border-radius: var(--radius); background: var(--white); padding: 30px; }
+    .case-panel + .case-panel { margin-top: 18px; }
+    .case-panel[hidden] + .case-panel { margin-top: 0; }
+    .case-kicker { font: 10px var(--mono); color: var(--orange); letter-spacing: .08em; margin-bottom: 11px; }
+    .case-panel h3 { font-size: 23px; margin-bottom: 12px; }
+    .case-situation { font-size: 14px; }
+    .case-setup { font-size: 12px; color: var(--muted); margin-top: 10px; }
+    .case-panel p code { font-size: .9em; }
+    .case-diagram { margin-block: 24px; padding: 23px; border: 1px solid var(--line); border-radius: 10px; background-color: var(--paper); background-image: radial-gradient(#d6dbce 1px, transparent 1px); background-size: 16px 16px; }
+    .diagram-track { display: flex; align-items: stretch; }
+    .diagram-node { flex: 1; min-width: 0; padding: 18px; background: var(--white); border: 1px solid #bdc9b8; border-radius: 8px; }
+    .diagram-node .mini-label { display: block; margin-bottom: 10px; }
+    .diagram-node strong { font-size: 15px; line-height: 1.6; display: block; }
+    .diagram-node code { display: block; font-size: 10px; line-height: 1.8; margin-top: 8px; overflow-wrap: anywhere; }
+    .diagram-node small { display: block; font-size: 11px; color: var(--muted); margin-top: 10px; }
+    .diagram-node.hub { background: var(--green); border-color: var(--green); color: var(--white); }
+    .diagram-node.hub .mini-label, .diagram-node.hub small { color: var(--lime); }
+    .diagram-node.vault-node { background: var(--soft-orange); border-color: #c5a48a; }
+    .diagram-arrow { flex: 0 0 70px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 4px; padding-inline: 5px; color: var(--green); text-align: center; }
+    .diagram-arrow b::before { content: "→"; }
+    .diagram-arrow b { font: 26px var(--mono); }
+    .diagram-arrow span { font: 10px/1.6 var(--mono); overflow-wrap: anywhere; }
+    .case-diagram figcaption { margin-top: 16px; font-size: 11px; color: var(--muted); }
+    .case-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 23px; }
+    .case-action { min-width: 0; }
+    .case-action h4 { font-size: 13px; margin: 0 0 10px; }
+    .case-action p { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+    .case-action pre { overflow-x: auto; font: 11px/1.9 var(--mono); padding: 16px; margin: 0; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); word-break: normal; }
+    .case-data { font: 12px/1.8 var(--mono); padding: 15px 18px; margin: 15px 0 0; background: var(--soft-green); border-radius: 8px; overflow-x: auto; }
+    .case-result { margin-top: 22px; padding: 15px 18px; border-left: 3px solid var(--green); background: var(--soft-green); font-size: 13px; }
+    .case-result strong { display: block; margin-bottom: 4px; }
+    .case-result p + p { margin-top: 8px; }
     .secrets-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; }
     .secret-card { padding: 28px; border-radius: var(--radius); background: var(--soft-orange); }
     .secret-card h3 { font-size: 20px; margin-top: 12px; }
@@ -178,6 +216,13 @@
       .flow-card { padding: 17px; }
       .prompt-section { grid-template-columns: 1fr; gap: 24px; }
       .prompt-section h2 br { display: none; }
+      .diagram-arrow { flex-basis: 48px; }
+      .diagram-node { padding: 13px; }
+      .diagram-node strong { font-size: 13px; }
+      .case-actions { grid-template-columns: 1fr; }
+      .diagram-track.four-nodes { flex-direction: column; }
+      .diagram-track.four-nodes .diagram-arrow { flex-basis: auto; flex-direction: row; padding: 7px; gap: 10px; }
+      .diagram-track.four-nodes .diagram-arrow b::before { content: "↓"; }
     }
     @media (max-width: 640px) {
       .wrap { width: calc(100% - 36px); }
@@ -199,6 +244,7 @@
       .section-heading { gap: 12px; margin-bottom: 22px; }
       .section-heading p { font-size: 12px; }
       .chapter-number { font-size: 20px; }
+      .chapter-number.case-marker { font-size: 10px; line-height: 1.6; padding-top: 7px; }
       .workflow { grid-template-columns: 1fr 1fr; gap: 12px; }
       .flow-card { min-height: 164px; }
       .workflow li:not(:last-child)::after { display: none; }
@@ -216,6 +262,17 @@
       .sync-route li + li { border-left: 0; border-top: 1px solid var(--line); }
       .sync-route .mini-label { margin-bottom: 8px; }
       .sync-route code { margin-top: 10px; }
+      .case-tabs { grid-template-columns: 1fr 1fr; gap: 7px; }
+      .case-tab { font-size: 12px; min-height: 48px; }
+      .case-panel { padding: 20px; }
+      .case-panel h3 { font-size: 20px; }
+      .case-diagram { padding: 15px; }
+      .diagram-track { flex-direction: column; }
+      .diagram-arrow { flex-basis: auto; flex-direction: row; padding: 7px; gap: 10px; }
+      .diagram-arrow b::before { content: "↓"; }
+      .diagram-node { padding: 17px; }
+      .diagram-node strong { font-size: 15px; }
+      .case-result { font-size: 12px; }
       .secret-card { padding: 24px; }
       .prompt-section { padding: 24px; gap: 24px; }
       .prompt-section h2 { font-size: 23px; }
@@ -246,6 +303,12 @@
       h2, h3, summary { break-after: avoid; }
       .workflow, .sync-route, .lab, .secret-card, .prompt-box { break-inside: avoid; }
       footer { margin-top: 20px; }
+      .case-tabs { display: none; }
+      .case-panel[hidden] { display: block !important; }
+      .case-panel { margin-top: 18px !important; break-before: page; }
+      .diagram-node.hub { background: #fff; color: #000; }
+      .diagram-node.hub * { color: #000 !important; }
+      .case-actions { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -320,6 +383,7 @@
       </ol>
       <p class="sync-highlight">설정 파일 세 개가 같은 <code>app.name</code>을 읽는다면? <strong>데이터 한 곳만 바꿔도 세 파일을 함께 새로 만들어요.</strong></p>
       <p class="inline-note"><code>apply</code>는 현재 소스를 적용, <code>push</code>는 소스를 올리기, <code>update</code>는 내려받기 + 적용이에요.</p>
+      <a class="case-jump" href="#workflows">내 상황에 맞는 네 가지 실전 모식도 보기 ↓</a>
       <div class="sync-detail">
         <details>
           <summary><span class="summary-number">01</span>처음 연결하는 컴퓨터</summary>
@@ -370,6 +434,124 @@ chezmoi update
           </div>
         </details>
       </div>
+    </section>
+
+    <section class="chapter" id="workflows" aria-labelledby="workflows-title">
+      <div class="section-heading">
+        <span class="chapter-number case-marker" aria-hidden="true">CASE<br>BOOK</span>
+        <div><h2 id="workflows-title">내 상황에서는, 이 순서로.</h2><p>상황을 고르면 모식도와 실제 명령을 함께 볼 수 있어요.</p></div>
+      </div>
+      <div class="case-tabs" role="tablist" aria-label="실전 workflow 선택">
+        <button class="case-tab" data-case-tab id="case-tab-shared" role="tab" type="button" aria-selected="true" aria-controls="case-shared" disabled>01 · 공통 설정 변경</button>
+        <button class="case-tab" data-case-tab id="case-tab-laptop" role="tab" type="button" aria-selected="false" aria-controls="case-laptop" tabindex="-1" disabled>02 · 새 노트북</button>
+        <button class="case-tab" data-case-tab id="case-tab-file" role="tab" type="button" aria-selected="false" aria-controls="case-file" tabindex="-1" disabled>03 · 일반 파일 수정</button>
+        <button class="case-tab" data-case-tab id="case-tab-key" role="tab" type="button" aria-selected="false" aria-controls="case-key" tabindex="-1" disabled>04 · API 키 교체</button>
+      </div>
+
+      <article class="case-panel" id="case-shared" role="tabpanel" aria-labelledby="case-tab-shared" tabindex="0">
+        <p class="case-kicker">CASE 01 / ONE VALUE, THREE FILES</p>
+        <h3>스터디 앱 이름을 세 설정에 함께 바꾸기</h3>
+        <p class="case-situation">AI 채팅·명령 도구·작업 도구의 앱 이름을 <code>friend-ai</code>에서 <code>study-ai</code>로 바꾸고 싶어요.</p>
+        <p class="case-setup">준비: 앞선 양식을 mirror·worker 양식으로 복사해 Git에 저장했고, 세 양식이 모두 <code>.app.name</code>을 읽는 상황이에요. 이 사례는 자동 커밋·푸시를 끈 기본 설정이며, 자동화는 Case 3에서 다뤄요.</p>
+        <figure class="case-diagram" aria-labelledby="diagram-shared-caption">
+          <div class="diagram-track">
+            <div class="diagram-node"><span class="mini-label">컴퓨터 A · 소스</span><strong>데이터 한 곳 수정</strong><code>app.name: study-ai<br>.chezmoidata.yaml + 양식</code><small>apply → A의 세 설정 파일</small></div>
+            <div class="diagram-arrow" aria-label="Git 커밋과 푸시"><span>commit<br>push</span><b aria-hidden="true"></b></div>
+            <div class="diagram-node hub"><span class="mini-label">GITHUB · DOTFILES</span><strong>데이터·양식 보관</strong><code>.chezmoidata.yaml<br>*.tmpl</code><small>완성된 .env는 올리지 않아요.</small></div>
+            <div class="diagram-arrow" aria-label="B에서 chezmoi update"><span>B에서<br>update</span><b aria-hidden="true"></b></div>
+            <div class="diagram-node"><span class="mini-label">컴퓨터 B · 완성 파일</span><strong>설정 세 개 일괄 갱신</strong><code>.friend-ai.env<br>.friend-mirror.env<br>.friend-worker.env</code><small>모두 APP_NAME="study-ai"</small></div>
+          </div>
+          <figcaption id="diagram-shared-caption">설정 파일을 복사하는 대신, 원본을 전달하고 각 컴퓨터에서 새로 만들어요.</figcaption>
+        </figure>
+        <p class="case-setup">A의 <code>chezmoi source-path</code> 폴더에서 <code>.chezmoidata.yaml</code>을 이렇게 바꿔요.</p>
+        <pre class="case-data"><code data-source-block="14">app:
+  name: study-ai
+  environment: practice
+</code></pre>
+        <div class="case-actions">
+          <div class="case-action"><h4>① 컴퓨터 A · 반영하고 올리기</h4><pre><code data-source-block="15">chezmoi apply
+chezmoi git add .chezmoidata.yaml
+chezmoi git -- commit -m "Rename AI study app"
+chezmoi git push
+</code></pre></div>
+          <div class="case-action"><h4>② 컴퓨터 B · 내려받고 적용하기</h4><pre><code data-source-block="16">chezmoi update
+</code></pre></div>
+        </div>
+        <div class="case-result"><strong>결과 · 값 한 번 수정 → 두 컴퓨터의 세 설정에 반영</strong><p>파일 이름은 그대로이고 안의 앱 이름이 바뀌어요. 실행 중인 도구는 설정을 다시 읽게 하거나 재시작해요.</p></div>
+      </article>
+
+      <article class="case-panel" id="case-laptop" role="tabpanel" aria-labelledby="case-tab-laptop" tabindex="0">
+        <p class="case-kicker">CASE 02 / A FRESH START</p>
+        <h3>새 노트북에서 내 작업 환경 시작하기</h3>
+        <p class="case-situation">노트북을 바꿨어요. 예전에 정리한 설정을 다시 쓰고 싶어요.</p>
+        <p class="case-setup">준비: Git·chezmoi 설치, 내 dotfiles 접근 권한. 명령의 <code>YOUR_NAME</code>은 내 GitHub 계정으로 바꿔요.</p>
+        <figure class="case-diagram" aria-labelledby="diagram-laptop-caption">
+          <div class="diagram-track">
+            <div class="diagram-node hub"><span class="mini-label">GITHUB</span><strong>내 설정 원본</strong><code>데이터 + 양식</code></div>
+            <div class="diagram-arrow" aria-label="chezmoi init으로 내려받기"><span>init</span><b aria-hidden="true"></b></div>
+            <div class="diagram-node"><span class="mini-label">새 노트북 · 소스</span><strong>내려받은 조리법</strong><code>dotfiles 복제 완료</code><small>비밀값을 쓰면 금고도 별도 준비</small></div>
+            <div class="diagram-arrow" aria-label="chezmoi apply로 적용"><span>apply</span><b aria-hidden="true"></b></div>
+            <div class="diagram-node"><span class="mini-label">새 노트북 · 홈</span><strong>내 설정 파일 완성</strong><code>관리 중인 파일들</code><small>앱이 파일을 읽으면 사용 준비</small></div>
+          </div>
+          <figcaption id="diagram-laptop-caption">이번에는 내려받기와 적용을 나눠서, 그 사이에 pass·GPG를 준비할 수 있어요.</figcaption>
+        </figure>
+        <div class="case-actions"><div class="case-action"><h4>새 노트북에서 순서대로 실행</h4><pre><code data-source-block="17"># 먼저 내 저장소를 내려받습니다.
+chezmoi init https://github.com/YOUR_NAME/dotfiles.git
+# 비밀값을 쓰면 이 단계 전에 pass 저장소·GPG 키를 따로 준비합니다.
+chezmoi apply
+</code></pre></div><div class="case-action"><h4>금고까지 준비돼 있다면?</h4><p>앞선 <code>init --apply</code>로 내려받기와 적용을 한 번에 할 수 있어요.</p><p>프로그램 설치 자체는 별도예요. dotfiles에 설치 자동화를 따로 작성한 경우에만 그 작업도 수행돼요.</p></div></div>
+        <div class="case-result"><strong>결과 · 새 노트북에 관리 설정이 만들어져요.</strong><p>설정 원본은 Git에서, 비밀값은 별도로 준비한 금고에서 가져와요.</p></div>
+      </article>
+
+      <article class="case-panel" id="case-file" role="tabpanel" aria-labelledby="case-tab-file" tabindex="0">
+        <p class="case-kicker">CASE 03 / EDIT, CAPTURE, SHARE</p>
+        <h3>홈에서 바꾼 일반 설정을 자동으로 올리기</h3>
+        <p class="case-situation">A의 <code>~/.friend-settings.conf</code>에서 <code>theme=green</code>을 <code>theme=dark</code>로 바꿨어요.</p>
+        <p class="case-setup">준비: 이미 관리 중인 비밀 없는 일반 파일이며, A의 <code>autoCommit</code>·<code>autoPush</code>가 켜져 있어요.</p>
+        <figure class="case-diagram" aria-labelledby="diagram-file-caption">
+          <div class="diagram-track four-nodes">
+            <div class="diagram-node"><span class="mini-label">A · 홈의 파일</span><strong>테마를 dark로 수정</strong><code>.friend-settings.conf</code></div>
+            <div class="diagram-arrow" aria-label="chezmoi re-add로 다시 담기"><span>re-add</span><b aria-hidden="true"></b></div>
+            <div class="diagram-node"><span class="mini-label">A · 소스</span><strong>수정 내용을 담기</strong><code>dot_friend-settings.conf</code></div>
+            <div class="diagram-arrow" aria-label="자동 커밋과 푸시"><span>자동<br>commit<br>push</span><b aria-hidden="true"></b></div>
+            <div class="diagram-node hub"><span class="mini-label">GITHUB</span><strong>변경 기록·보관</strong><code>theme=dark</code></div>
+            <div class="diagram-arrow" aria-label="B에서 chezmoi update"><span>B에서<br>update</span><b aria-hidden="true"></b></div>
+            <div class="diagram-node"><span class="mini-label">B · 홈의 파일</span><strong>테마 변경 반영</strong><code>.friend-settings.conf</code></div>
+          </div>
+          <figcaption id="diagram-file-caption">홈에서 바꾼 파일은 다시 담는 단계가 필요해요. 자동 커밋·푸시는 그다음 작업을 줄여 줘요.</figcaption>
+        </figure>
+        <div class="case-actions">
+          <div class="case-action"><h4>① 컴퓨터 A · 다시 담고 자동으로 올리기</h4><pre><code data-source-block="18">chezmoi re-add ~/.friend-settings.conf
+</code></pre></div>
+          <div class="case-action"><h4>② 컴퓨터 B · 내려받아 적용하기</h4><pre><code data-source-block="19">chezmoi update
+</code></pre></div>
+        </div>
+        <div class="case-result"><strong>결과 · B의 같은 파일에도 theme=dark</strong><p>자동화를 껐다면 직접 커밋·푸시해요. 템플릿은 <code>re-add</code> 대신 데이터·양식을 수정하고, 새 파일은 관리 방식을 정한 뒤 <code>add</code>로 등록해요.</p></div>
+      </article>
+
+      <article class="case-panel" id="case-key" role="tabpanel" aria-labelledby="case-tab-key" tabindex="0">
+        <p class="case-kicker">CASE 04 / A NEW KEY, THE SAME ADDRESS</p>
+        <h3>API 키만 새 키로 교체하기</h3>
+        <p class="case-situation">AI 서비스에서 새 키를 발급받았어요. 양식은 그대로 쓰고 키만 바꾸고 싶어요.</p>
+        <p class="case-setup">준비: <code>.friend-ai.env</code> 양식이 데이터에 적힌 <code>api/openai/api_key</code> 경로에서 키를 읽고 있어요.</p>
+        <figure class="case-diagram" aria-labelledby="diagram-key-caption">
+          <div class="diagram-track">
+            <div class="diagram-node vault-node"><span class="mini-label">각 컴퓨터 · PASS</span><strong>같은 칸의 키 교체</strong><code>api/openai/api_key<br>값: ● ● ● ● ● ●</code></div>
+            <div class="diagram-arrow" aria-label="apply가 금고에서 값을 읽음"><span>apply가<br>키 읽기</span><b aria-hidden="true"></b></div>
+            <div class="diagram-node"><span class="mini-label">같은 컴퓨터 · 양식</span><strong>경로는 그대로 사용</strong><code>pass로 새 키 조회</code><small>데이터·양식 변경 없음</small></div>
+            <div class="diagram-arrow" aria-label="완성 파일 생성"><span>파일<br>생성</span><b aria-hidden="true"></b></div>
+            <div class="diagram-node vault-node"><span class="mini-label">같은 컴퓨터 · .ENV</span><strong>새 키로 다시 만들기</strong><code>OPENAI_API_KEY="●●●"</code><small>앱이 설정을 다시 읽도록 재시작</small></div>
+          </div>
+          <figcaption id="diagram-key-caption">이 모식도에는 GitHub로 키를 보내는 화살표가 없어요. 각 컴퓨터에서 별도로 반복해요.</figcaption>
+        </figure>
+        <div class="case-actions">
+          <div class="case-action"><h4>① 키를 바꿀 컴퓨터 · 금고 값 교체</h4><p>덮어쓰기 질문을 확인하고 새 키는 입력 창에 입력해요.</p><pre><code data-source-block="20">pass insert api/openai/api_key
+</code></pre></div>
+          <div class="case-action"><h4>② 같은 컴퓨터 · 파일을 다시 만들기</h4><pre><code data-source-block="21">chezmoi apply ~/.friend-ai.env
+</code></pre></div>
+        </div>
+        <div class="case-result"><strong>결과 · 키만 바뀌므로 dotfiles 커밋·푸시는 필요 없어요.</strong><p>다른 컴퓨터의 금고에도 새 값을 별도로 준비한 뒤 각자 <code>apply</code>해요. pass 저장소의 별도 동기화를 쓴다면 그 절차를 따라요.</p><p>키가 출력될 수 있는 <code>diff</code>로 교체 결과를 확인하지 않아요.</p></div>
+      </article>
     </section>
 
     <section class="chapter" id="playground" aria-labelledby="lab-title">
@@ -548,6 +730,7 @@ printf '%s\n' "$APP_NAME"
         <a href="https://www.chezmoi.io/reference/commands/execute-template/">execute-template ↗</a>
         <a href="https://www.chezmoi.io/user-guide/daily-operations/">Git 연동·자동 커밋 ↗</a>
         <a href="https://www.chezmoi.io/reference/commands/update/">update 명령 ↗</a>
+        <a href="https://www.chezmoi.io/reference/commands/re-add/">re-add 명령 ↗</a>
       </div>
     </section>
 
@@ -565,7 +748,7 @@ printf '%s\n' "$APP_NAME"
       "use strict";
       const appName = document.querySelector("#app-name");
       const environment = document.querySelector("#app-environment");
-      const tabs = [...document.querySelectorAll('[role="tab"]')];
+      const tabs = [...document.querySelectorAll('.lab [role="tab"]')];
       const captions = [
         "여기에 값을 모아요. 다른 양식에서도 같은 값을 꺼내 쓸 수 있어요.",
         "양식에는 값 대신 빈칸을 둬요. 이름을 바꿔도 양식은 그대로예요.",
@@ -612,6 +795,32 @@ printf '%s\n' "$APP_NAME"
       appName.addEventListener("input", updatePreview);
       environment.addEventListener("change", updatePreview);
       updatePreview();
+
+      const caseTabs = [...document.querySelectorAll("[data-case-tab]")];
+      function activateCase(index) {
+        caseTabs.forEach((tab, position) => {
+          const selected = position === index;
+          tab.setAttribute("aria-selected", String(selected));
+          tab.tabIndex = selected ? 0 : -1;
+          document.getElementById(tab.getAttribute("aria-controls")).hidden = !selected;
+        });
+      }
+      caseTabs.forEach((tab, index) => {
+        tab.disabled = false;
+        tab.addEventListener("click", () => activateCase(index));
+        tab.addEventListener("keydown", event => {
+          let next;
+          if (event.key === "ArrowRight") next = (index + 1) % caseTabs.length;
+          if (event.key === "ArrowLeft") next = (index + caseTabs.length - 1) % caseTabs.length;
+          if (event.key === "Home") next = 0;
+          if (event.key === "End") next = caseTabs.length - 1;
+          if (next === undefined) return;
+          event.preventDefault();
+          activateCase(next);
+          caseTabs[next].focus();
+        });
+      });
+      activateCase(0);
 
       const copyButton = document.querySelector("#copy-prompt");
       const prompt = document.querySelector("#ai-prompt");

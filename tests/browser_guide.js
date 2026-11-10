@@ -55,6 +55,27 @@ async (page) => {
   await page.locator("#sync details summary").last().click();
   assert(await page.locator("[data-source-block='13']").isVisible(), "Automation settings must expand");
 
+  await page.getByRole("link", { name: "내 상황에 맞는 네 가지 실전 모식도 보기 ↓", exact: true }).click();
+  const caseTabs = page.locator("[data-case-tab]");
+  const casePanels = page.locator(".case-panel");
+  assert(await caseTabs.count() === 4, "Four practical cases must be available");
+  for (let index = 0; index < 4; index++) {
+    await caseTabs.nth(index).click();
+    assert(await casePanels.nth(index).isVisible(), `Case ${index + 1} must open`);
+    assert(await page.locator(".case-panel:visible").count() === 1, "Only the selected case should appear");
+    assert(await casePanels.nth(index).locator("figure .diagram-node").count() >= 3, "Each case must contain a workflow diagram");
+    assert(await casePanels.nth(index).locator(".case-action pre:visible").count() >= 1, "Each case must provide actual commands");
+  }
+  await caseTabs.last().press("ArrowRight");
+  assert(await caseTabs.first().getAttribute("aria-selected") === "true", "Case tabs must wrap with arrow keys");
+  await caseTabs.first().press("End");
+  assert(await caseTabs.last().evaluate(element => element === document.activeElement), "End must focus the last case");
+  assert(await page.locator("#tab-result").getAttribute("aria-selected") === "true", "Case tabs must not change the separate live preview");
+  await page.emulateMedia({ media: "print" });
+  assert(await page.locator(".case-panel:visible").count() === 4, "All cases must be printable");
+  await page.emulateMedia({ media: "screen" });
+  assert(await page.locator(".case-panel:visible").count() === 1, "Printing must preserve the case selection");
+
   const firstSummary = page.locator("#practice details summary").first();
   await firstSummary.click();
   assert(await page.locator("#practice details").first().getAttribute("open") !== null, "Practice section must expand");
@@ -69,7 +90,10 @@ async (page) => {
 
   for (const width of [1440, 768, 390, 320]) {
     await page.setViewportSize({ width, height: 900 });
-    assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `No horizontal page overflow at ${width}px`);
+    for (let index = 0; index < 4; index++) {
+      await caseTabs.nth(index).click();
+      assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `No horizontal overflow in case ${index + 1} at ${width}px`);
+    }
   }
   const offline = await page.context().newPage();
   const cdp = await offline.context().newCDPSession(offline);
@@ -78,10 +102,11 @@ async (page) => {
   assert(await offline.locator("noscript").innerText() !== "", "No-script readers must receive guidance");
   await offline.locator("#practice details summary").first().click();
   assert(await offline.locator("[data-source-block='0']").isVisible(), "Practice must work without JavaScript");
+  assert(await offline.locator(".case-panel:visible").count() === 4, "All cases must be readable without JavaScript");
   await offline.close();
 
   assert(errors.length === 0, `Browser errors: ${errors.join(", ")}`);
   await page.reload();
   await page.setViewportSize({ width: 1440, height: 1000 });
-  return { passed: true, checked: ["live preview", "keyboard tabs", "input escaping", "clipboard success and denial", "Git sync section", "practice disclosure", "print", "responsive widths", "no JavaScript"] };
+  return { passed: true, checked: ["live preview", "keyboard tabs", "input escaping", "clipboard success and denial", "Git sync section", "four case diagrams and workflows", "independent case tabs", "practice disclosure", "print all cases", "all cases at responsive widths", "no JavaScript"] };
 }

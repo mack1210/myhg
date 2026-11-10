@@ -2,6 +2,7 @@
 import os
 from pathlib import Path
 import re
+import shlex
 import subprocess
 import tempfile
 import unittest
@@ -58,6 +59,20 @@ class GuideTest(unittest.TestCase):
             env = dict(os.environ, PATH=str(binaries) + os.pathsep + os.environ["PATH"])
             self.assertEqual(run("execute-template", input=templates[1], env=env),
                              'OPENAI_API_KEY="fake-test-key"\n')
+
+            # Case 4: rotating only the fake vault value changes the target, not the source.
+            template.write_text(templates[0] + templates[1])
+            source_before = (data.read_text(), template.read_text())
+            run("apply", str(output), env=env)
+            self.assertIn('OPENAI_API_KEY="fake-test-key"', output.read_text())
+            fake_pass.write_text(fake_pass.read_text().replace("fake-test-key", "fake-rotated-key"))
+            raw_blocks = [body for _, body in blocks]
+            rotation = shlex.split(raw_blocks[21].replace("~/", str(home) + "/"))
+            self.assertEqual(rotation[0], "chezmoi")
+            run(*rotation[1:], env=env)
+            self.assertIn('OPENAI_API_KEY="fake-rotated-key"', output.read_text())
+            self.assertNotIn("fake-test-key", output.read_text())
+            self.assertEqual((data.read_text(), template.read_text()), source_before)
 
 
 if __name__ == "__main__":

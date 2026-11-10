@@ -69,9 +69,10 @@ class GitSyncTest(unittest.TestCase):
             data.write_text(blocks[1])
             primary = "private_dot_friend-ai.env.tmpl"
             mirror = "private_dot_friend-mirror.env.tmpl"
-            for name in (primary, mirror):
+            worker = "private_dot_friend-worker.env.tmpl"
+            for name in (primary, mirror, worker):
                 (source_a / name).write_text(blocks[2])
-            run(cli_a + ["git", "add", ".chezmoidata.yaml", primary, mirror])
+            run(cli_a + ["git", "add", ".chezmoidata.yaml", primary, mirror, worker])
             run(cli_a + ["git", "--", "commit", "-m", "Seed sample settings"])
             run(cli_a + ["git", "--", "push", "-u", "origin", "main"])
 
@@ -79,7 +80,7 @@ class GitSyncTest(unittest.TestCase):
             documented(cli_b, blocks[9], {
                 "https://github.com/YOUR_NAME/dotfiles.git": remote.as_uri(),
             })
-            targets = (".friend-ai.env", ".friend-mirror.env")
+            targets = (".friend-ai.env", ".friend-mirror.env", ".friend-worker.env")
             for name in targets:
                 self.assertEqual((home_b / name).read_text(), blocks[4])
 
@@ -105,6 +106,36 @@ class GitSyncTest(unittest.TestCase):
             self.assertFalse((home_b / ordinary.name).exists(), "Other machines still need update")
             documented(cli_b, blocks[11])
             self.assertEqual((home_b / ordinary.name).read_text(), ordinary.read_text())
+
+            # Case 1: execute the actual casebook commands and update all three files.
+            config_a.write_text("")
+            data.write_text(blocks[14])
+            documented(cli_a, blocks[15])
+            documented(cli_b, blocks[16])
+            for home in (home_a, home_b):
+                for name in targets:
+                    self.assertIn('APP_NAME="study-ai"', (home / name).read_text())
+
+            # Case 2: init alone must leave the new home untouched until apply.
+            _, home_c, _, cli_c = machine("new-laptop")
+            setup = [line for line in blocks[17].splitlines() if line.startswith("chezmoi ")]
+            documented(cli_c, setup[0], {
+                "https://github.com/YOUR_NAME/dotfiles.git": remote.as_uri(),
+            })
+            self.assertFalse((home_c / targets[0]).exists())
+            documented(cli_c, setup[1])
+            for name in targets:
+                self.assertIn('APP_NAME="study-ai"', (home_c / name).read_text())
+
+            # Case 3: re-add an edited plain file, automatically push, then update B.
+            config_a.write_text(blocks[13])
+            ordinary.write_text("theme=dark\n")
+            documented(cli_a, blocks[18], {"~/": str(home_a) + "/"})
+            self.assertEqual(run(["git", "--git-dir", str(remote), "show",
+                                  "main:dot_friend-settings.conf"]), "theme=dark\n")
+            self.assertEqual((home_b / ordinary.name).read_text(), "theme=green\n")
+            documented(cli_b, blocks[19])
+            self.assertEqual((home_b / ordinary.name).read_text(), "theme=dark\n")
 
 
 if __name__ == "__main__":
