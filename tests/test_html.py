@@ -71,6 +71,17 @@ class HTMLGuideTest(unittest.TestCase):
         self.assertEqual((ROOT / ".nojekyll").read_bytes(), b"")
         self.assertTrue((ROOT / "index.html").is_file())
 
+    def test_overview_has_all_stages_and_local_vector_icons(self):
+        nodes = {attrs["data-overview-node"] for _, attrs in self.page.elements
+                 if "data-overview-node" in attrs}
+        self.assertEqual(nodes, {"computer-a", "github", "computer-b", "data", "pass",
+                                 "chezmoi", "output", "app"})
+        symbols = {attrs["id"] for tag, attrs in self.page.elements if tag == "symbol"}
+        self.assertGreaterEqual(len(symbols), 7)
+        for tag, attrs in self.page.elements:
+            if tag == "use":
+                self.assertIn(attrs["href"][1:], symbols)
+
 
 if __name__ == "__main__":
     unittest.main()

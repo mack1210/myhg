@@ -9,6 +9,18 @@ async (page) => {
   await page.reload();
   await page.setViewportSize({ width: 1440, height: 1000 });
 
+  await page.getByRole("link", { name: "전체 지도", exact: true }).click();
+  assert(await page.locator("#overview-title").isVisible(), "The main navigation must reach the overview");
+  assert(await page.locator("#overview [data-overview-node]").count() === 8, "The overview must include sharing and local assembly stages");
+  assert(await page.locator(".share-map [data-overview-node='pass']").count() === 0, "The vault must remain outside the Git sharing path");
+  assert(await page.locator(".local-map [data-overview-node='pass']").isVisible(), "The local assembly path must show the vault");
+  assert(await page.locator(".overview-legend").innerText().then(text => text.includes("초록 실선") && text.includes("주황 점선")), "Path meanings must be labeled beyond color");
+  const iconVisible = await page.locator("[data-overview-node='computer-a'] use").first().evaluate(element => {
+    const box = element.getBBox();
+    return box.width > 0 && box.height > 0;
+  });
+  assert(iconVisible, "Inline vector illustrations must render");
+
   await page.getByLabel("앱 이름", { exact: true }).fill("my-friend-ai");
   await page.getByLabel("실행 환경", { exact: true }).selectOption("development");
   assert((await page.locator("#preview-data").textContent()).includes('name: "my-friend-ai"'), "Data must update");
@@ -72,6 +84,7 @@ async (page) => {
   assert(await caseTabs.last().evaluate(element => element === document.activeElement), "End must focus the last case");
   assert(await page.locator("#tab-result").getAttribute("aria-selected") === "true", "Case tabs must not change the separate live preview");
   await page.emulateMedia({ media: "print" });
+  assert(await page.locator(".overview-map").isVisible(), "The overall diagram must be printable");
   assert(await page.locator(".case-panel:visible").count() === 4, "All cases must be printable");
   await page.emulateMedia({ media: "screen" });
   assert(await page.locator(".case-panel:visible").count() === 1, "Printing must preserve the case selection");
@@ -90,6 +103,7 @@ async (page) => {
 
   for (const width of [1440, 768, 390, 320]) {
     await page.setViewportSize({ width, height: 900 });
+    assert(await page.locator(".overview-map").evaluate(element => element.scrollWidth <= element.clientWidth), `Overview must fit at ${width}px`);
     for (let index = 0; index < 4; index++) {
       await caseTabs.nth(index).click();
       assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `No horizontal overflow in case ${index + 1} at ${width}px`);
@@ -103,10 +117,11 @@ async (page) => {
   await offline.locator("#practice details summary").first().click();
   assert(await offline.locator("[data-source-block='0']").isVisible(), "Practice must work without JavaScript");
   assert(await offline.locator(".case-panel:visible").count() === 4, "All cases must be readable without JavaScript");
+  assert(await offline.locator("#overview .local-map").isVisible(), "The overview must work without JavaScript");
   await offline.close();
 
   assert(errors.length === 0, `Browser errors: ${errors.join(", ")}`);
   await page.reload();
   await page.setViewportSize({ width: 1440, height: 1000 });
-  return { passed: true, checked: ["live preview", "keyboard tabs", "input escaping", "clipboard success and denial", "Git sync section", "four case diagrams and workflows", "independent case tabs", "practice disclosure", "print all cases", "all cases at responsive widths", "no JavaScript"] };
+  return { passed: true, checked: ["overall illustrated map", "local secret path", "vector icons", "live preview", "keyboard tabs", "input escaping", "clipboard success and denial", "Git sync section", "four case diagrams and workflows", "independent case tabs", "practice disclosure", "print", "responsive widths", "no JavaScript"] };
 }
