@@ -67,6 +67,10 @@ class HTMLGuideTest(unittest.TestCase):
                 self.assertNotIn("src", attrs)
                 self.assertNotIn("href", attrs)
 
+    def test_pages_skips_jekyll_to_preserve_chezmoi_templates(self):
+        self.assertEqual((ROOT / ".nojekyll").read_bytes(), b"")
+        self.assertTrue((ROOT / "index.html").is_file())
+
 
 if __name__ == "__main__":
     unittest.main()
